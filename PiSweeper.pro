@@ -6,9 +6,10 @@ INCLUDEPATH += .
 
 # Input
 SOURCES += main.cpp \
-           pisweeper.cpp
+           pisweeper.cpp 
 
-HEADERS += \
-           pisweeper.h
+HEADERS += pisweeper.h \
+           pisweeperwindow.h 
 
 QT += widgets
+

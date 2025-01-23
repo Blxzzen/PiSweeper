@@ -1,9 +1,9 @@
 #include <QApplication>
-#include "pisweeper.h"
+#include "pisweeperwindow.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    PiSweeper window;
+    PiSweeperWindow window;
     window.show();
     return app.exec();
 }

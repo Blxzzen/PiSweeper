@@ -11,5 +11,7 @@ SOURCES += main.cpp \
 HEADERS += pisweeper.h \
            pisweeperwindow.h 
 
+RESOURCES += resources.qrc
+
 QT += widgets
 

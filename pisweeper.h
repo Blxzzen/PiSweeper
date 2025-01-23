@@ -3,24 +3,26 @@
 
 #include <QWidget>
 #include <QVector>
-
-class QPushButton;
-class QGridLayout;
+#include <QPushButton>
+#include <QGridLayout>
 
 class PiSweeper : public QWidget {
     Q_OBJECT
 public:
     explicit PiSweeper(QWidget *parent = nullptr);
-    ~PiSweeper();
 
 private:
     QGridLayout *gridLayout;
     QVector<QVector<QPushButton*>> buttons;
+    QVector<QVector<bool>> bombs;
     int rows = 16;
     int cols = 30;
+    int totalBombs = 99;
 
     void setupBoard();
+    void placeBombs();
     void buttonClicked();
+    int countBombs(int x, int y);
 };
 
 #endif // PISWEEPER_H

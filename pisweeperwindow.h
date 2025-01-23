@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QMenuBar>
-#include <QApplication>
+#include <QMenu>
+#include <QAction>
+#include <QApplication> 
 #include "pisweeper.h"
 
 class PiSweeperWindow : public QMainWindow {
@@ -14,23 +16,21 @@ public:
         setWindowTitle("PiSweeper");
         resize(800, 600);
 
-        // Ensure standard window decorations are used
-        setWindowFlag(Qt::CustomizeWindowHint, false);
-
-        // Create the game widget and set it as the central widget
         PiSweeper *gameWidget = new PiSweeper(this);
         setCentralWidget(gameWidget);
 
-        // Create Menu Bar
-        QMenuBar *menuBar = new QMenuBar(this);
+        setupMenuBar();
+    }
+
+private:
+    void setupMenuBar() {
+        QMenuBar *menuBar = new QMenuBar();
         QMenu *fileMenu = menuBar->addMenu("&File");
 
-        // Add Fullscreen toggle action
         QAction *toggleFullscreenAction = new QAction("Toggle Fullscreen", this);
         fileMenu->addAction(toggleFullscreenAction);
         connect(toggleFullscreenAction, &QAction::triggered, this, &PiSweeperWindow::toggleFullscreen);
 
-        // Add Quit action
         QAction *quitAction = new QAction("&Quit", this);
         fileMenu->addAction(quitAction);
         connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);

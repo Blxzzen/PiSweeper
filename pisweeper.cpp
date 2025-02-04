@@ -4,19 +4,34 @@
 #include <QPushButton>
 #include <QGridLayout>
 
-PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
-    gridLayout = new QGridLayout(this);
+PiSweeper::PiSweeper(QWidget *parent) : QMainWindow(parent) {  // 👈 Now uses QMainWindow
+
+    
+    centralWidget = new QWidget(this);  // 👈 Create a central widget
+    QWidget *gridContainer = new QWidget(centralWidget);
+    gridLayout = new QGridLayout(gridContainer);
+    gridContainer->setLayout(gridLayout);
+
+    
+    gridLayout = new QGridLayout(centralWidget);
     gridLayout->setSpacing(0);
-    gridLayout->setContentsMargins(0,0,0,0);
-    gridLayout->setHorizontalSpacing(0);
-    gridLayout->setVerticalSpacing(0);
+    gridLayout->setContentsMargins(0, 0, 0, 0);
+    gridLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+
 
     setupBoard();
+
+    // Ensure the layout updates properly
+    centralWidget->setLayout(gridLayout);
+    update();
+    show();
 }
 
+
 void PiSweeper::setupBoard() {
+
     QPixmap pixmap(":/images/default.jpg");
-    pixmap = pixmap.scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pixmap = pixmap.scaled(20, 20);
 
     for (int row = 0; row < rows; ++row) {
         QVector<QPushButton*> rowButtons;
@@ -64,11 +79,23 @@ void PiSweeper::setupBoard() {
 
 void PiSweeper::buttonClicked() {
     QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
+    if (!clickedButton) {
+        return;
+    }
+
     int index = gridLayout->indexOf(clickedButton);
+    if (index == -1) {
+        return;
+    }
+
     int row = index / cols;
     int col = index % cols;
-    
-    // Example logic for clicking on the button
+
+    if (row < 0 || row >= rows || col < 0 || col >= cols) {
+        return;
+    }
+
+    // Now we are sure row & col are safe
     if (bombs[row][col]) {
         clickedButton->setText("Bomb");
     } else {
@@ -77,6 +104,7 @@ void PiSweeper::buttonClicked() {
     }
     clickedButton->setEnabled(false);
 }
+
 
 int PiSweeper::countBombs(int x, int y) {
     int count = 0;

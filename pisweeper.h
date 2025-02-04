@@ -1,17 +1,18 @@
 #ifndef PISWEEPER_H
 #define PISWEEPER_H
 
-#include <QWidget>
+#include <QMainWindow>  // 👈 Change from QWidget to QMainWindow
 #include <QVector>
 #include <QPushButton>
 #include <QGridLayout>
 
-class PiSweeper : public QWidget {
+class PiSweeper : public QMainWindow {  // 👈 Inherit from QMainWindow
     Q_OBJECT
 public:
     explicit PiSweeper(QWidget *parent = nullptr);
 
 private:
+    QWidget *centralWidget;  // 👈 Needed for QMainWindow
     QGridLayout *gridLayout;
     QVector<QVector<QPushButton*>> buttons;
     QVector<QVector<bool>> bombs;

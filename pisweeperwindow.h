@@ -26,6 +26,8 @@ private:
     void setupToolBar();
     bool eventFilter(QObject *obj, QEvent *event) override;
 
+    void returnToMenu();
+
     QPoint lastMousePosition;
     bool dragging = false;
 };

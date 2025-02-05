@@ -42,12 +42,18 @@ void PiSweeperWindow::setupToolBar() {
     toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     toolBar->setVisible(true);
 
+    // Create Menu Button
+    QAction *menuAction = new QAction("Menu", this);
+    connect(menuAction, &QAction::triggered, this, &PiSweeperWindow::returnToMenu); 
+
+    // Create Exit Button
     QAction *exitAction = new QAction("Exit", this);
     connect(exitAction, &QAction::triggered, qApp, &QApplication::quit);
 
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
+    toolBar->addAction(menuAction);
     toolBar->addWidget(spacer);
     toolBar->addAction(exitAction);
 
@@ -94,4 +100,17 @@ bool PiSweeperWindow::eventFilter(QObject *obj, QEvent *event) {
         }
     }
     return QMainWindow::eventFilter(obj, event);
+}
+
+void PiSweeperWindow::returnToMenu() {
+    // Remove the game instance if it's active
+    if (game) {
+        delete game;
+        game = nullptr;
+    }
+
+    // Show the menu again
+    menu = new Menu(this);
+    connect(menu, &Menu::playClicked, this, &PiSweeperWindow::startGame);
+    mainLayout->addWidget(menu);
 }

@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <QRandomGenerator>
+#include <QVariant>
 
 PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
     
@@ -15,7 +16,7 @@ PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
     gridLayout = new QGridLayout(centralWidget);
 
     setupBoard();
-    placeBombs(); // 🔥 Place bombs after setting up board
+    placeBombs();
 
     centralWidget->setLayout(gridLayout);
     update();
@@ -30,7 +31,7 @@ void PiSweeper::setupBoard() {
     QPixmap pixmap(":/images/default/default.jpg");
     pixmap = pixmap.scaled(32, 32);
 
-    // 🔥 Properly resize and initialize bomb grid
+    // Properly resize and initialize bomb grid
     bombs.resize(rows);
     for (int i = 0; i < rows; ++i) {
         bombs[i].resize(cols);
@@ -68,7 +69,7 @@ void PiSweeper::setupBoard() {
 }
 
 
-// 🔥 Places bombs at random positions
+// Places bombs at random positions
 void PiSweeper::placeBombs() {
     int placedBombs = 0;
     while (placedBombs < totalBombs) {
@@ -101,21 +102,80 @@ void PiSweeper::buttonClicked() {
     }
 
     if (bombs[row][col]) {
+        // Set bomb tile image
         QPixmap bombPixmap(":/images/default/defaultbomb.jpg");
         bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        
         clickedButton->setIcon(QIcon(bombPixmap));
         clickedButton->setIconSize(bombPixmap.size());
     } else {
         int bombCount = countBombs(row, col);
-        clickedButton->setText(bombCount > 0 ? QString::number(bombCount) : "");
+
+        if (bombCount > 0) {
+            // Show bomb count
+            clickedButton->setText(QString::number(bombCount));
+        } else {
+            // Empty tile → Use `defaultempty.jpg` and recursively reveal adjacent empty tiles
+            QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
+            emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            clickedButton->setIcon(QIcon(emptyPixmap));
+            clickedButton->setIconSize(emptyPixmap.size());
+
+            revealAdjacentEmptyTiles(row, col);
+        }
     }
 
-    clickedButton->setEnabled(false);
+    clickedButton->setStyleSheet("QPushButton { background: none; border: none; }");
 }
 
 
-// 🔥 Counts adjacent bombs
+void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
+    // Check bounds
+    if (x < 0 || x >= rows || y < 0 || y >= cols) {
+        return;
+    }
+
+    QPushButton *button = buttons[x][y];
+    if (!button || !button->isEnabled()) {
+        return;  // Already revealed
+    }
+
+    // Prevent infinite recursion
+    if (button->property("revealed").toBool()) {
+        return;
+    }
+
+    // Mark the button as revealed
+    button->setProperty("revealed", QVariant(true));
+
+    int bombCount = countBombs(x, y);
+
+    if (bombCount > 0) {
+        button->setText(QString::number(bombCount));
+        button->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        button->setFocusPolicy(Qt::NoFocus);
+        return;
+    }
+
+    // Set empty tile image
+    QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
+    emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    button->setIcon(QIcon(emptyPixmap));
+    button->setIconSize(emptyPixmap.size());
+
+    button->setAttribute(Qt::WA_TransparentForMouseEvents, true); 
+    button->setFocusPolicy(Qt::NoFocus);
+
+    // Recursively reveal only non-bomb empty tiles
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0) continue; // Skip self
+            revealAdjacentEmptyTiles(x + dx, y + dy);
+        }
+    }
+}
+
+
+
 int PiSweeper::countBombs(int x, int y) {
     int count = 0;
     for (int i = -1; i <= 1; i++) {

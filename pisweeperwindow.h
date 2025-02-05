@@ -26,7 +26,7 @@ public:
         // Create a vertical layout
         QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
 
-        // Option A: Use alignment flags
+        // Use alignment flags
         mainLayout->addWidget(gameWidget, /*stretch=*/0, Qt::AlignCenter);
 
 

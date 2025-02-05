@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>images/default/default.jpg</file>
         <file>images/default/defaultbomb.jpg</file>
+        <file>images/default/defaultempty.jpg</file>
     </qresource>
 </RCC>

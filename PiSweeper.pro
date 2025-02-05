@@ -6,10 +6,12 @@ INCLUDEPATH += .
 
 # Input
 SOURCES += main.cpp \
-           pisweeper.cpp 
+           pisweeper.cpp \
+           gameover.cpp
 
 HEADERS += pisweeper.h \
-           pisweeperwindow.h 
+           pisweeperwindow.h \
+           gameover.h
 
 RESOURCES += resources.qrc
 

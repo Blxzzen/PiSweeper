@@ -1,4 +1,6 @@
 #include "pisweeper.h"
+#include "gameover.h"
+
 #include <QPixmap>
 #include <QIcon>
 #include <QPushButton>
@@ -88,6 +90,8 @@ void PiSweeper::placeBombs() {
 }
 
 void PiSweeper::buttonClicked() {
+    if (gameOver) return;
+
     QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
     if (!clickedButton) return;
 
@@ -108,6 +112,10 @@ void PiSweeper::buttonClicked() {
         bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         clickedButton->setIcon(QIcon(bombPixmap));
         clickedButton->setIconSize(bombPixmap.size());
+        GameOverHandler::revealAllBombs(buttons, bombs);
+        GameOverHandler::showGameOver(this);
+        gameOver = true;
+        return;
     } else {
         int bombCount = countBombs(row, col);
 
@@ -160,16 +168,27 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
     if (row < 0 || row >= rows || col < 0 || col >= cols) return;
 
     if (!flags[row][col]) {
-        // Set flag
+        // First right-click: Set flag
         QPixmap flagPixmap(":/images/default/defaultflag.jpg");
         flagPixmap = flagPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         button->setIcon(QIcon(flagPixmap));
         button->setIconSize(flagPixmap.size());
 
         flags[row][col] = true;
-        button->setProperty("flagged", true);;  // Prevent left-clicking
+        button->setProperty("flagged", true);  // Prevent left-clicking
+        button->setProperty("state", 1);  // Track state (flag)
+
+    } else if (button->property("state").toInt() == 1) {
+        // Second right-click: Set question mark
+        QPixmap questionPixmap(":/images/default/defaultquestion.jpg");
+        questionPixmap = questionPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        button->setIcon(QIcon(questionPixmap));
+        button->setIconSize(questionPixmap.size());
+
+        button->setProperty("state", 2);  // Track state (question)
+        
     } else {
-        // Remove flag
+        // Third right-click: Reset tile
         QPixmap defaultPixmap(":/images/default/default.jpg");
         defaultPixmap = defaultPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         button->setIcon(QIcon(defaultPixmap));
@@ -177,8 +196,10 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
 
         flags[row][col] = false;
         button->setProperty("flagged", false);  // Allow left-clicking again
+        button->setProperty("state", 0);  // Reset state
     }
 }
+
 
 
 void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
@@ -239,11 +260,11 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     switch (bombCount) {
         case 1: color = "#52cbff"; break;  // Light Blue
         case 2: color = "#52ff80"; break;  // Light Green
-        case 3: color = "#ffe552"; break;  // Light Yellow
-        case 4: color = "#ff8b2b"; break;  // Light Orange
-        case 5: color = "#ff3b3b"; break;  // Light Red
-        case 6: color = "#ff78cb"; break;  // Pink
-        case 7: color = "#a333ff"; break;  // Purple
+        case 3: color = "#ff3b3b"; break;  // Light Red
+        case 4: color = "#ff78cb"; break;  // Pink
+        case 5: color = "#ff8b2b"; break;  // Light Orange
+        case 6: color = "#a333ff"; break;  // Purple
+        case 7: color = "#ffe552"; break;  // Light Yellow
         case 8: color = "#ffffff"; break;  // White
     }
     

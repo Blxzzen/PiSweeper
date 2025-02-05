@@ -1,6 +1,7 @@
 #ifndef PISWEEPER_H
 #define PISWEEPER_H
 
+#include "gameover.h"
 #include <QMainWindow>  // Change from QWidget to QMainWindow
 #include <QVector>
 #include <QPushButton>
@@ -22,6 +23,7 @@ private:
     int rows = 16;
     int cols = 30;
     int totalBombs = 99;
+    bool gameOver = false; // Track if the game is over
 
     void setupBoard();
     void placeBombs();

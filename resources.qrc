@@ -4,5 +4,6 @@
         <file>images/default/defaultbomb.jpg</file>
         <file>images/default/defaultempty.jpg</file>
         <file>images/default/defaultflag.jpg</file>
+        <file>images/default/defaultquestion.jpg</file>
     </qresource>
 </RCC>

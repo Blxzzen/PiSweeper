@@ -18,6 +18,7 @@ private:
     QGridLayout *gridLayout;
     QVector<QVector<QPushButton*>> buttons;
     QVector<QVector<bool>> bombs;
+    QVector<QVector<bool>> flags;
     int rows = 16;
     int cols = 30;
     int totalBombs = 99;
@@ -27,6 +28,8 @@ private:
     void buttonClicked();
     int countBombs(int x, int y);
 
+    void mousePressEvent(QMouseEvent *event);
+    void rightClickHandler(QPushButton *button);
     void revealAdjacentEmptyTiles(int x, int y); 
     void setNumberedTileAppearance(QPushButton *button, int bombCount);
 };

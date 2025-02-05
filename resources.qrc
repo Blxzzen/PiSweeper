@@ -3,5 +3,6 @@
         <file>images/default/default.jpg</file>
         <file>images/default/defaultbomb.jpg</file>
         <file>images/default/defaultempty.jpg</file>
+        <file>images/default/defaultflag.jpg</file>
     </qresource>
 </RCC>

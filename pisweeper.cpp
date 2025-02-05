@@ -7,6 +7,7 @@
 #include <QVariant>
 #include <QFont>
 #include <QLabel>
+#include <QMouseEvent>
 
 PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
     
@@ -34,8 +35,12 @@ void PiSweeper::setupBoard() {
     pixmap = pixmap.scaled(32, 32);
 
     bombs.resize(rows);
+    flags.resize(rows);
+
     for (int i = 0; i < rows; ++i) {
         bombs[i].resize(cols);
+        flags[i].resize(cols);
+        std::fill(flags[i].begin(), flags[i].end(), false);
         std::fill(bombs[i].begin(), bombs[i].end(), false);
     }
 
@@ -94,6 +99,10 @@ void PiSweeper::buttonClicked() {
 
     if (row < 0 || row >= rows || col < 0 || col >= cols) return;
 
+    if (flags[row][col] || clickedButton->property("flagged").toBool()) {
+        return;  // Don't allow clicking flagged tiles
+    }
+
     if (bombs[row][col]) {
         QPixmap bombPixmap(":/images/default/defaultbomb.jpg");
         bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -129,6 +138,48 @@ int PiSweeper::countBombs(int x, int y) {
     }
     return count;
 }
+
+void PiSweeper::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::RightButton) {
+        QPushButton *clickedButton = qobject_cast<QPushButton*>(childAt(event->pos()));
+        if (clickedButton) {
+            rightClickHandler(clickedButton);
+        }
+    } else {
+        QWidget::mousePressEvent(event);
+    }
+}
+
+void PiSweeper::rightClickHandler(QPushButton *button) {
+    int index = gridLayout->indexOf(button);
+    if (index == -1) return;
+
+    int row = index / cols;
+    int col = index % cols;
+
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+
+    if (!flags[row][col]) {
+        // Set flag
+        QPixmap flagPixmap(":/images/default/defaultflag.jpg");
+        flagPixmap = flagPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        button->setIcon(QIcon(flagPixmap));
+        button->setIconSize(flagPixmap.size());
+
+        flags[row][col] = true;
+        button->setProperty("flagged", true);;  // Prevent left-clicking
+    } else {
+        // Remove flag
+        QPixmap defaultPixmap(":/images/default/default.jpg");
+        defaultPixmap = defaultPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        button->setIcon(QIcon(defaultPixmap));
+        button->setIconSize(defaultPixmap.size());
+
+        flags[row][col] = false;
+        button->setProperty("flagged", false);  // Allow left-clicking again
+    }
+}
+
 
 void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
     if (x < 0 || x >= rows || y < 0 || y >= cols) return;
@@ -186,14 +237,14 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     // Color code numbers (like real Minesweeper)
     QString color;
     switch (bombCount) {
-        case 1: color = "#0000FF"; break;  // Blue
-        case 2: color = "#008000"; break;  // Green
-        case 3: color = "#FF0000"; break;  // Red
-        case 4: color = "#000080"; break;  // Dark Blue
-        case 5: color = "#800000"; break;  // Brown
-        case 6: color = "#00FFFF"; break;  // Cyan
-        case 7: color = "#000000"; break;  // Black
-        case 8: color = "#808080"; break;  // Gray
+        case 1: color = "#52cbff"; break;  // Light Blue
+        case 2: color = "#52ff80"; break;  // Light Green
+        case 3: color = "#ffe552"; break;  // Light Yellow
+        case 4: color = "#ff8b2b"; break;  // Light Orange
+        case 5: color = "#ff3b3b"; break;  // Light Red
+        case 6: color = "#ff78cb"; break;  // Pink
+        case 7: color = "#a333ff"; break;  // Purple
+        case 8: color = "#ffffff"; break;  // White
     }
     
     label->setStyleSheet("color: " + color + "; font-weight: bold; font-size: 18px;");

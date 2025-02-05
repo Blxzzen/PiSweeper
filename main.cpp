@@ -11,8 +11,8 @@ int main(int argc, char *argv[]) {
         }
     )");
 
-    PiSweeperWindow window;  // Launch PiSweeperWindow (which is the ACTUAL main window)
+    PiSweeperWindow window;
     window.show();
+
     return app.exec();
 }
-

@@ -28,6 +28,7 @@ private:
     int countBombs(int x, int y);
 
     void revealAdjacentEmptyTiles(int x, int y); 
+    void setNumberedTileAppearance(QPushButton *button, int bombCount);
 };
 
 #endif // PISWEEPER_H

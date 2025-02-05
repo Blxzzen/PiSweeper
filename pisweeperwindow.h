@@ -10,6 +10,7 @@
 #include <QToolBar>
 #include <QMouseEvent>
 #include <QVBoxLayout>
+#include <QMenuBar>
 
 class PiSweeperWindow : public QMainWindow {
     Q_OBJECT
@@ -17,16 +18,22 @@ public:
     PiSweeperWindow() {
         setWindowTitle("PiSweeper");
         setupToolBar();
-        resize(700, 400);
+        resize(998,580);
 
         QWidget *mainWidget = new QWidget(this);
+        PiSweeper *gameWidget = new PiSweeper(this);
+
+        // Create a vertical layout
         QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
 
-        PiSweeper *gameWidget = new PiSweeper(this);
-        mainLayout->addWidget(gameWidget);
+        // Option A: Use alignment flags
+        mainLayout->addWidget(gameWidget, /*stretch=*/0, Qt::AlignCenter);
+
+
 
         mainWidget->setLayout(mainLayout);
         setCentralWidget(mainWidget);
+
     }
 
 private:
@@ -71,6 +78,7 @@ private:
 
     QPoint lastMousePosition;
     bool dragging = false;
+
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override {

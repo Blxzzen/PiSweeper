@@ -3,48 +3,49 @@
 #include <QIcon>
 #include <QPushButton>
 #include <QGridLayout>
+#include <QRandomGenerator>
 
-PiSweeper::PiSweeper(QWidget *parent) : QMainWindow(parent) {  // 👈 Now uses QMainWindow
-
+PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
     
-    centralWidget = new QWidget(this);  // 👈 Create a central widget
+    centralWidget = new QWidget(this);  // Create a central widget
     QWidget *gridContainer = new QWidget(centralWidget);
     gridLayout = new QGridLayout(gridContainer);
     gridContainer->setLayout(gridLayout);
 
-    
     gridLayout = new QGridLayout(centralWidget);
-    gridLayout->setSpacing(0);
-    gridLayout->setContentsMargins(0, 0, 0, 0);
-    gridLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-
 
     setupBoard();
+    placeBombs(); // 🔥 Place bombs after setting up board
 
-    // Ensure the layout updates properly
     centralWidget->setLayout(gridLayout);
     update();
     show();
 }
 
+QSize PiSweeper::sizeHint() const {
+    return QSize(998, 580); // Enough space for 30 columns, 16 rows
+}
 
 void PiSweeper::setupBoard() {
+    QPixmap pixmap(":/images/default/default.jpg");
+    pixmap = pixmap.scaled(32, 32);
 
-    QPixmap pixmap(":/images/default.jpg");
-    pixmap = pixmap.scaled(20, 20);
+    // 🔥 Properly resize and initialize bomb grid
+    bombs.resize(rows);
+    for (int i = 0; i < rows; ++i) {
+        bombs[i].resize(cols);
+        std::fill(bombs[i].begin(), bombs[i].end(), false); // Explicitly initialize all to false
+    }
 
     for (int row = 0; row < rows; ++row) {
         QVector<QPushButton*> rowButtons;
         for (int col = 0; col < cols; ++col) {
             QPushButton *button = new QPushButton;
 
-            // Prevent resizing issues
-            button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-            button->setMinimumSize(20, 20);
-            button->setMaximumSize(20, 20);
-            button->setFixedSize(20, 20);
+            button->setMinimumSize(32, 32);
+            button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            button->setFixedSize(32, 32);
             
-            // Remove ALL internal spacing or borders
             button->setStyleSheet("QPushButton {"
                                   " padding: 0px; "
                                   " margin: 0px; "
@@ -63,19 +64,23 @@ void PiSweeper::setupBoard() {
         buttons.push_back(rowButtons);
     }
 
-    // Force the grid to be FIXED and not distribute extra space
     gridLayout->setSpacing(0);
-    gridLayout->setContentsMargins(0, 0, 0, 0);
-    gridLayout->setSizeConstraint(QLayout::SetFixedSize);
-
-    for (int i = 0; i < rows; ++i)
-        gridLayout->setRowStretch(i, 0);
-    
-    for (int i = 0; i < cols; ++i)
-        gridLayout->setColumnStretch(i, 0);
 }
 
 
+// 🔥 Places bombs at random positions
+void PiSweeper::placeBombs() {
+    int placedBombs = 0;
+    while (placedBombs < totalBombs) {
+        int r = QRandomGenerator::global()->bounded(rows);
+        int c = QRandomGenerator::global()->bounded(cols);
+
+        if (!bombs[r][c]) {
+            bombs[r][c] = true;
+            placedBombs++;
+        }
+    }
+}
 
 void PiSweeper::buttonClicked() {
     QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
@@ -95,17 +100,22 @@ void PiSweeper::buttonClicked() {
         return;
     }
 
-    // Now we are sure row & col are safe
     if (bombs[row][col]) {
-        clickedButton->setText("Bomb");
+        QPixmap bombPixmap(":/images/default/defaultbomb.jpg");
+        bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        
+        clickedButton->setIcon(QIcon(bombPixmap));
+        clickedButton->setIconSize(bombPixmap.size());
     } else {
         int bombCount = countBombs(row, col);
         clickedButton->setText(bombCount > 0 ? QString::number(bombCount) : "");
     }
+
     clickedButton->setEnabled(false);
 }
 
 
+// 🔥 Counts adjacent bombs
 int PiSweeper::countBombs(int x, int y) {
     int count = 0;
     for (int i = -1; i <= 1; i++) {

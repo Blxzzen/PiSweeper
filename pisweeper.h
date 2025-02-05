@@ -6,10 +6,12 @@
 #include <QPushButton>
 #include <QGridLayout>
 
-class PiSweeper : public QMainWindow {  // 👈 Inherit from QMainWindow
+class PiSweeper : public QWidget {  // 👈 Inherit from QMainWindow
     Q_OBJECT
 public:
     explicit PiSweeper(QWidget *parent = nullptr);
+
+    QSize sizeHint() const;
 
 private:
     QWidget *centralWidget;  // 👈 Needed for QMainWindow

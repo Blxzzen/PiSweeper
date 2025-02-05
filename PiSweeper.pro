@@ -9,12 +9,14 @@ SOURCES += main.cpp \
            pisweeper.cpp \
            pisweeperwindow.cpp \
            gameover.cpp \
-           menu.cpp
+           menu.cpp \
+           victory.cpp
 
 HEADERS += pisweeper.h \
            pisweeperwindow.h \
            gameover.h \
-           menu.h
+           menu.h \
+           victory.h
 
 RESOURCES += resources.qrc
 

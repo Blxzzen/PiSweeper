@@ -121,6 +121,14 @@ void PiSweeper::buttonClicked() {
 
         if (bombCount > 0) {
             setNumberedTileAppearance(clickedButton, bombCount);
+            clickedButton->setProperty("revealed", QVariant(true));  // Mark as revealed
+            
+            if (checkVictory()) {
+                VictoryHandler::revealAllTiles(buttons);
+                VictoryHandler::showVictory(this);
+                gameOver = true;
+            }
+            
         } else {
             QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
             emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -132,13 +140,8 @@ void PiSweeper::buttonClicked() {
     }
 
     clickedButton->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-    if (checkVictory()) {
-        VictoryHandler::revealAllTiles(buttons);
-        VictoryHandler::showVictory(this);
-        gameOver = true;
-    }
 }
+
 
 int PiSweeper::countBombs(int x, int y) {
     int count = 0;
@@ -212,11 +215,9 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
     if (x < 0 || x >= rows || y < 0 || y >= cols) return;
 
     QPushButton *button = buttons[x][y];
-    if (!button || !button->isEnabled()) return;
+    if (!button || button->property("revealed").toBool()) return;  // Already revealed
 
-    if (button->property("revealed").toBool()) return;
-
-    button->setProperty("revealed", QVariant(true));
+    button->setProperty("revealed", QVariant(true));  // Ensure the tile is marked as revealed
 
     int bombCount = countBombs(x, y);
 
@@ -233,13 +234,21 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
     button->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     button->setFocusPolicy(Qt::NoFocus);
 
+    // **Recursive reveal**
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
             if (dx == 0 && dy == 0) continue;
             revealAdjacentEmptyTiles(x + dx, y + dy);
         }
     }
+
+    if (checkVictory()) {
+        VictoryHandler::revealAllTiles(buttons);
+        VictoryHandler::showVictory(this);
+        gameOver = true;
+    }
 }
+
 
 
 void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
@@ -280,16 +289,27 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     label->setGeometry(button->rect()); 
 
     label->show();
+
+    if (checkVictory()) {
+        VictoryHandler::revealAllTiles(buttons);
+        VictoryHandler::showVictory(this);
+        gameOver = true;
+    }
 }
 
+
 bool PiSweeper::checkVictory() {
+    int unrevealedTiles = 0;
+
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
             if (!bombs[row][col] && !buttons[row][col]->property("revealed").toBool()) {
-                return false;  // There are still non-bomb tiles unrevealed
+                unrevealedTiles++;
             }
         }
     }
-    return true;  // All non-bomb tiles are revealed
+
+    return (unrevealedTiles == 0);  // Victory triggers when all non-bomb tiles are revealed
 }
+
 

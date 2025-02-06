@@ -3,10 +3,11 @@
 void VictoryHandler::revealAllTiles(QVector<QVector<QPushButton*>>& buttons) {
     for (int row = 0; row < buttons.size(); ++row) {
         for (int col = 0; col < buttons[row].size(); ++col) {
-            buttons[row][col]->setEnabled(false);  // Disable all tiles
+            buttons[row][col]->setEnabled(false);
         }
     }
 }
+
 
 void VictoryHandler::showVictory(QWidget* parent) {
     QLabel *victoryLabel = new QLabel("Victory!", parent);

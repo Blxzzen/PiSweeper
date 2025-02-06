@@ -23,7 +23,7 @@ private:
     QVector<QVector<bool>> flags;
     int rows = 16;
     int cols = 30;
-    int totalBombs = 1;
+    int totalBombs = 99;
     bool gameOver = false; // Track if the game is over
 
     void setupBoard();

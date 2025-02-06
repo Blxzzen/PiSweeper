@@ -14,7 +14,7 @@ public:
     explicit PiSweeperWindow(QWidget *parent = nullptr);
 
 private slots:
-    void startGame();  // Function to switch from Menu → Game
+    void startGame();  // Function to switch from Menu to Game
 
 private:
     QWidget *mainWidget;

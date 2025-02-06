@@ -3,9 +3,22 @@
 #include <QApplication>
 
 
-PiSweeperWindow::PiSweeperWindow(QWidget *parent) : QMainWindow(parent), game(nullptr) {
+PiSweeperWindow::PiSweeperWindow(QWidget *parent) : QMainWindow(parent), game(nullptr), skinsMenu(nullptr) {
     setWindowTitle("PiSweeper");
     resize(998, 580);
+
+    // Load current skin from JSON
+    QFile file("skins.json");
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray jsonData = file.readAll();
+        file.close();
+
+        QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+        QJsonObject root = doc.object();
+        currentSkin = root["currentSkin"].toString();  // Store it
+    } else {
+        currentSkin = "default";  // Fallback
+    }
 
     // Main layout container
     mainWidget = new QWidget(this);
@@ -14,25 +27,27 @@ PiSweeperWindow::PiSweeperWindow(QWidget *parent) : QMainWindow(parent), game(nu
     // Create Toolbar
     setupToolBar();
 
-    // Create Menu (Starts as the first screen)
+    // Create Menu
     menu = new Menu(this);
     connect(menu, &Menu::playClicked, this, &PiSweeperWindow::startGame);
+    connect(menu, &Menu::skinsClicked, this, &PiSweeperWindow::openSkinsMenu);
 
-    // Add menu to layout
     mainLayout->addWidget(menu);
     mainWidget->setLayout(mainLayout);
     setCentralWidget(mainWidget);
 }
 
+
 void PiSweeperWindow::startGame() {
-    // Remove the menu
     delete menu;
     menu = nullptr;
 
-    // Load Minesweeper game
-    game = new PiSweeper(this);
+    game = new PiSweeper(this, currentSkin);
     mainLayout->addWidget(game);
 }
+
+
+
 
 void PiSweeperWindow::setupToolBar() {
     toolBar = new QToolBar(this);
@@ -103,14 +118,83 @@ bool PiSweeperWindow::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void PiSweeperWindow::returnToMenu() {
-    // Remove the game instance if it's active
+    // Remove the game if it's running
     if (game) {
         delete game;
         game = nullptr;
     }
 
-    // Show the menu again
+    // Remove skins menu if it's active
+    if (skinsMenu) {
+        delete skinsMenu;
+        skinsMenu = nullptr;
+    }
+
+    // Clear the layout before adding the menu back
+    QLayoutItem *child;
+    while ((child = mainLayout->takeAt(0)) != nullptr) {
+        delete child->widget();
+        delete child;
+    }
+
+    // Recreate the main menu
     menu = new Menu(this);
     connect(menu, &Menu::playClicked, this, &PiSweeperWindow::startGame);
+    connect(menu, &Menu::skinsClicked, this, &PiSweeperWindow::openSkinsMenu);
+
     mainLayout->addWidget(menu);
 }
+
+void PiSweeperWindow::openSkinsMenu() {
+    // Remove the menu first
+    if (menu) {
+        delete menu;
+        menu = nullptr;
+    }
+
+    // Remove the game if it was running
+    if (game) {
+        delete game;
+        game = nullptr;
+    }
+
+    // Clear the layout
+    QLayoutItem *child;
+    while ((child = mainLayout->takeAt(0)) != nullptr) {
+        delete child->widget();
+        delete child;
+    }
+
+    // Create and add the skins menu
+    skinsMenu = new SkinsMenu(this);
+    connect(skinsMenu, &SkinsMenu::skinSelected, this, &PiSweeperWindow::applySkin);
+    connect(skinsMenu, &SkinsMenu::backToMenu, this, &PiSweeperWindow::returnToMenu);
+
+    mainLayout->addWidget(skinsMenu);
+}
+
+void PiSweeperWindow::applySkin(QString skinName) {
+    // Update `currentSkin` in memory
+    currentSkin = skinName;
+
+    // Update `currentSkin` in `skins.json`
+    QFile file("skins.json");
+    if (!file.open(QIODevice::ReadWrite)) {
+        qDebug() << "Failed to open skins.json";
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    QJsonObject root = doc.object();
+    
+    root["currentSkin"] = skinName;  // Overwrite current skin
+
+    file.resize(0);
+    file.write(QJsonDocument(root).toJson());
+    file.close();
+
+    // Return to menu
+    returnToMenu();
+}
+

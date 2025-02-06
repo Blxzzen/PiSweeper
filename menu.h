@@ -13,6 +13,7 @@ public:
 
 signals:
     void playClicked();  // Signal for when Play is clicked
+    void skinsClicked();
 
 private:
     QLabel *titleLabel;

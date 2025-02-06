@@ -1,10 +1,10 @@
 #include "gameover.h"
 
-void GameOverHandler::revealAllBombs(QVector<QVector<QPushButton*>>& buttons, QVector<QVector<bool>>& bombs) {
+void GameOverHandler::revealAllBombs(QVector<QVector<QPushButton*>>& buttons, QVector<QVector<bool>>& bombs, const QString &skin) {
     for (int row = 0; row < buttons.size(); ++row) {
         for (int col = 0; col < buttons[row].size(); ++col) {
             if (bombs[row][col]) {
-                QPixmap bombPixmap(":/images/default/defaultbomb.jpg");
+                QPixmap bombPixmap(":/images/" + skin + "/bomb.jpg");  // Load bomb image from the correct skin
                 bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
                 buttons[row][col]->setIcon(QIcon(bombPixmap));
                 buttons[row][col]->setIconSize(bombPixmap.size());

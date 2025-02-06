@@ -51,6 +51,8 @@ Menu::Menu(QWidget *parent) : QWidget(parent) {
         }
     )");
 
+    connect(skinsButton, &QPushButton::clicked, this, &Menu::skinsClicked);
+
     // Add widgets to layout
     layout->addStretch();
     layout->addWidget(titleLabel, 0, Qt::AlignCenter);

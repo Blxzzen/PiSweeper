@@ -1,0 +1,28 @@
+{
+    "currentSkin": "valentines",
+    "skins": {
+        "skull": {
+            "folder": "images/golden",
+            "unlockRequirement": 1,
+            "unlocked": false
+        },
+        "default": {
+            "folder": "images/default",
+            "unlocked": true
+        },
+        "golden": {
+            "folder": "images/golden",
+            "unlockRequirement": 1,
+            "unlocked": false
+        },
+        "light": {
+            "folder": "images/light",
+            "unlocked": true
+        },
+        "valentines": {
+            "folder": "images/valentines",
+            "unlocked": true
+        }
+    },
+    "wins": 0
+}

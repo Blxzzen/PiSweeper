@@ -1,9 +1,27 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/default/default.jpg</file>
-        <file>images/default/defaultbomb.jpg</file>
-        <file>images/default/defaultempty.jpg</file>
-        <file>images/default/defaultflag.jpg</file>
-        <file>images/default/defaultquestion.jpg</file>
+        <file>images/default/block.jpg</file>
+        <file>images/default/bomb.jpg</file>
+        <file>images/default/empty.jpg</file>
+        <file>images/default/flag.jpg</file>
+        <file>images/default/question.jpg</file>
+
+        <file>images/light/block.jpg</file>
+        <file>images/light/bomb.jpg</file>
+        <file>images/light/empty.jpg</file>
+        <file>images/light/flag.jpg</file>
+        <file>images/light/question.jpg</file>
+
+        <file>images/valentines/block.jpg</file>
+        <file>images/valentines/bomb.jpg</file>
+        <file>images/valentines/empty.jpg</file>
+        <file>images/valentines/flag.jpg</file>
+        <file>images/valentines/question.jpg</file>
+
+        <file>images/golden/block.jpg</file>
+        <file>images/golden/bomb.jpg</file>
+        <file>images/golden/empty.jpg</file>
+        <file>images/golden/flag.jpg</file>
+        <file>images/golden/question.jpg</file>
     </qresource>
 </RCC>

@@ -11,8 +11,8 @@
 #include <QLabel>
 #include <QMouseEvent>
 
-PiSweeper::PiSweeper(QWidget *parent) : QWidget(parent) {
-    
+PiSweeper::PiSweeper(QWidget *parent, const QString &skinName) : QWidget(parent), skin(skinName) {
+
     centralWidget = new QWidget(this);
     QWidget *gridContainer = new QWidget(centralWidget);
     gridLayout = new QGridLayout(gridContainer);
@@ -33,7 +33,7 @@ QSize PiSweeper::sizeHint() const {
 }
 
 void PiSweeper::setupBoard() {
-    QPixmap pixmap(":/images/default/default.jpg");
+    QPixmap pixmap(":/images/" + skin + "/block.jpg");  // Use selected skin
     pixmap = pixmap.scaled(32, 32);
 
     bombs.resize(rows);
@@ -108,11 +108,11 @@ void PiSweeper::buttonClicked() {
     }
 
     if (bombs[row][col]) {
-        QPixmap bombPixmap(":/images/default/defaultbomb.jpg");
+        QPixmap bombPixmap(":/images/" + skin + "/bomb.jpg");  // Load bomb image from the correct skin
         bombPixmap = bombPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         clickedButton->setIcon(QIcon(bombPixmap));
         clickedButton->setIconSize(bombPixmap.size());
-        GameOverHandler::revealAllBombs(buttons, bombs);
+        GameOverHandler::revealAllBombs(buttons, bombs, skin);
         GameOverHandler::showGameOver(this);
         gameOver = true;
         return;
@@ -130,7 +130,7 @@ void PiSweeper::buttonClicked() {
             }
             
         } else {
-            QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
+            QPixmap emptyPixmap(":/images/" + skin + "/empty.jpg");  // Load empty image from the correct skin
             emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             clickedButton->setIcon(QIcon(emptyPixmap));
             clickedButton->setIconSize(emptyPixmap.size());
@@ -178,7 +178,7 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
 
     if (!flags[row][col]) {
         // First right-click: Set flag
-        QPixmap flagPixmap(":/images/default/defaultflag.jpg");
+        QPixmap flagPixmap(":/images/" + skin + "/flag.jpg");  // Load flag image from the correct skin
         flagPixmap = flagPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         button->setIcon(QIcon(flagPixmap));
         button->setIconSize(flagPixmap.size());
@@ -189,7 +189,7 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
 
     } else if (button->property("state").toInt() == 1) {
         // Second right-click: Set question mark
-        QPixmap questionPixmap(":/images/default/defaultquestion.jpg");
+        QPixmap questionPixmap(":/images/" + skin + "/question.jpg");  // Load question image from the correct skin
         questionPixmap = questionPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         button->setIcon(QIcon(questionPixmap));
         button->setIconSize(questionPixmap.size());
@@ -198,7 +198,7 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
         
     } else {
         // Third right-click: Reset tile
-        QPixmap defaultPixmap(":/images/default/default.jpg");
+        QPixmap defaultPixmap(":/images/" + skin + "/block.jpg");  // Load block image from the correct skin
         defaultPixmap = defaultPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         button->setIcon(QIcon(defaultPixmap));
         button->setIconSize(defaultPixmap.size());
@@ -226,7 +226,7 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
         return;
     }
 
-    QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
+    QPixmap emptyPixmap(":/images/" + skin + "/empty.jpg");  // Load empty image from the correct skin
     emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     button->setIcon(QIcon(emptyPixmap));
     button->setIconSize(emptyPixmap.size());
@@ -253,7 +253,7 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
 
 void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     // Set empty tile background
-    QPixmap emptyPixmap(":/images/default/defaultempty.jpg");
+    QPixmap emptyPixmap(":/images/" + skin + "/empty.jpg");  // Load empty image from the correct skin
     emptyPixmap = emptyPixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     button->setIcon(QIcon(emptyPixmap));
     button->setIconSize(emptyPixmap.size());

@@ -9,7 +9,7 @@
 
 class GameOverHandler {
 public:
-    static void revealAllBombs(QVector<QVector<QPushButton*>>& buttons, QVector<QVector<bool>>& bombs);
+    static void revealAllBombs(QVector<QVector<QPushButton*>>& buttons, QVector<QVector<bool>>& bombs, const QString &skin);
     static void showGameOver(QWidget* parent);
 };
 

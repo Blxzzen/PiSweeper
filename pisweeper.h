@@ -11,7 +11,7 @@
 class PiSweeper : public QWidget {  // Inherit from QMainWindow
     Q_OBJECT
 public:
-    explicit PiSweeper(QWidget *parent = nullptr);
+    explicit PiSweeper(QWidget *parent = nullptr, const QString &skinName = "default");
 
     QSize sizeHint() const;
 
@@ -23,8 +23,9 @@ private:
     QVector<QVector<bool>> flags;
     int rows = 16;
     int cols = 30;
-    int totalBombs = 99;
+    int totalBombs = 1;
     bool gameOver = false; // Track if the game is over
+    QString skin;
 
     void setupBoard();
     void placeBombs();

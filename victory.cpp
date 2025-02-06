@@ -1,14 +1,17 @@
 #include "victory.h"
 
+// Reveal all tiles on win
 void VictoryHandler::revealAllTiles(QVector<QVector<QPushButton*>>& buttons) {
     for (int row = 0; row < buttons.size(); ++row) {
         for (int col = 0; col < buttons[row].size(); ++col) {
-            buttons[row][col]->setEnabled(false);
+            buttons[row][col]->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            buttons[row][col]->setFocusPolicy(Qt::NoFocus);  // Prevent focus highlight
+
         }
     }
 }
 
-
+// Show the victory text and background
 void VictoryHandler::showVictory(QWidget* parent) {
     QLabel *victoryLabel = new QLabel("Victory!", parent);
     victoryLabel->setFont(QFont("DejaVu Sans", 36, QFont::Bold));

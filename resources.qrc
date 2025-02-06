@@ -23,5 +23,11 @@
         <file>images/golden/empty.jpg</file>
         <file>images/golden/flag.jpg</file>
         <file>images/golden/question.jpg</file>
+
+        <file>images/skull/block.jpg</file>
+        <file>images/skull/bomb.jpg</file>
+        <file>images/skull/empty.jpg</file>
+        <file>images/skull/flag.jpg</file>
+        <file>images/skull/question.jpg</file>
     </qresource>
 </RCC>

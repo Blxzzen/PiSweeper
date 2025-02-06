@@ -1,5 +1,6 @@
 #include "menu.h"
 
+// Menu components 
 Menu::Menu(QWidget *parent) : QWidget(parent) {
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -32,7 +33,7 @@ Menu::Menu(QWidget *parent) : QWidget(parent) {
 
     connect(playButton, &QPushButton::clicked, this, &Menu::playClicked);
 
-    // Skins Button (currently does nothing)
+    // Skins Button
     skinsButton = new QPushButton("Skins", this);
     skinsButton->setStyleSheet(R"(
         QPushButton {

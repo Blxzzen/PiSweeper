@@ -6,14 +6,15 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+// Declarations
 class Menu : public QWidget {
     Q_OBJECT
 public:
     explicit Menu(QWidget *parent = nullptr);
 
 signals:
-    void playClicked();  // Signal for when Play is clicked
-    void skinsClicked();
+    void playClicked();  // Signal for when Play button is clicked
+    void skinsClicked(); // Signal for when Skins button is clicked
 
 private:
     QLabel *titleLabel;

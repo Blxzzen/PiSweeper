@@ -10,8 +10,11 @@
 #include <QFont>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QJsonObject>
+#include <QJsonDocument>
 
-PiSweeper::PiSweeper(QWidget *parent, const QString &skinName) : QWidget(parent), skin(skinName) {
+// Main game
+PiSweeper::PiSweeper(QWidget *parent, const QString &skinName) : QWidget(parent), skin(skinName), firstClick(true) {
 
     centralWidget = new QWidget(this);
     QWidget *gridContainer = new QWidget(centralWidget);
@@ -20,8 +23,7 @@ PiSweeper::PiSweeper(QWidget *parent, const QString &skinName) : QWidget(parent)
 
     gridLayout = new QGridLayout(centralWidget);
 
-    setupBoard();
-    placeBombs();
+    setupBoard(); // Sets up the tiles
 
     centralWidget->setLayout(gridLayout);
     update();
@@ -29,9 +31,10 @@ PiSweeper::PiSweeper(QWidget *parent, const QString &skinName) : QWidget(parent)
 }
 
 QSize PiSweeper::sizeHint() const {
-    return QSize(998, 580);
+    return QSize(998, 580); // Setting fixed size, was easier than making responsive
 }
 
+// Getting everything ready to play and use
 void PiSweeper::setupBoard() {
     QPixmap pixmap(":/images/" + skin + "/block.jpg");  // Use selected skin
     pixmap = pixmap.scaled(32, 32);
@@ -76,11 +79,19 @@ void PiSweeper::setupBoard() {
     gridLayout->setSpacing(0);
 }
 
-void PiSweeper::placeBombs() {
+// Place the bombs at speicifc tile indices
+void PiSweeper::placeBombs(int firstRow, int firstCol) {
     int placedBombs = 0;
+
     while (placedBombs < totalBombs) {
         int r = QRandomGenerator::global()->bounded(rows);
         int c = QRandomGenerator::global()->bounded(cols);
+
+        // Skip first click and adjacent tiles
+        if ((r >= firstRow - 1 && r <= firstRow + 1) &&
+            (c >= firstCol - 1 && c <= firstCol + 1)) {
+            continue;  // Skip placing bombs near first click
+        }
 
         if (!bombs[r][c]) {
             bombs[r][c] = true;
@@ -89,22 +100,31 @@ void PiSweeper::placeBombs() {
     }
 }
 
-void PiSweeper::buttonClicked() {
-    if (gameOver) return;
 
+// Run appropriate checks each time a button is clicked
+void PiSweeper::buttonClicked() {
+    if (gameOver) return; // if the game is already over, do nothing
+
+    
     QPushButton *clickedButton = qobject_cast<QPushButton*>(sender());
-    if (!clickedButton) return;
+    if (!clickedButton) return; // Ensures button validity
 
     int index = gridLayout->indexOf(clickedButton);
-    if (index == -1) return;
+    if (index == -1) return; // Ensures button index is in grid layout
 
     int row = index / cols;
     int col = index % cols;
 
-    if (row < 0 || row >= rows || col < 0 || col >= cols) return;
+    if (row < 0 || row >= rows || col < 0 || col >= cols) return; // Ensures rows/cols in valid bounds
 
     if (flags[row][col] || clickedButton->property("flagged").toBool()) {
         return;  // Don't allow clicking flagged tiles
+    }
+
+    // First click of game: Place bombs dynamically avoiding this tile
+    if (firstClick) {
+        placeBombs(row, col);  // Place bombs but exclude first click via row and col index
+        firstClick = false; // Turn first click off for the rest of current game
     }
 
     if (bombs[row][col]) {
@@ -126,6 +146,7 @@ void PiSweeper::buttonClicked() {
             if (checkVictory()) {
                 VictoryHandler::revealAllTiles(buttons);
                 VictoryHandler::showVictory(this);
+                updateWins();  // Track wins in JSON
                 gameOver = true;
             }
             
@@ -142,7 +163,7 @@ void PiSweeper::buttonClicked() {
     clickedButton->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
-
+// Counts the bombs around a given tile (most likely tile just pressed unless adjacent tiles are empty)
 int PiSweeper::countBombs(int x, int y) {
     int count = 0;
     for (int i = -1; i <= 1; i++) {
@@ -156,6 +177,7 @@ int PiSweeper::countBombs(int x, int y) {
     return count;
 }
 
+// Hnadles the difference between right and left clicks
 void PiSweeper::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::RightButton) {
         QPushButton *clickedButton = qobject_cast<QPushButton*>(childAt(event->pos()));
@@ -167,6 +189,7 @@ void PiSweeper::mousePressEvent(QMouseEvent *event) {
     }
 }
 
+// Handles specifically right clicks
 void PiSweeper::rightClickHandler(QPushButton *button) {
     int index = gridLayout->indexOf(button);
     if (index == -1) return;
@@ -194,7 +217,7 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
         button->setIcon(QIcon(questionPixmap));
         button->setIconSize(questionPixmap.size());
 
-        button->setProperty("state", 2);  // Track state (question)
+        button->setProperty("state", 2);  // Track state (question mark)
         
     } else {
         // Third right-click: Reset tile
@@ -210,7 +233,7 @@ void PiSweeper::rightClickHandler(QPushButton *button) {
 }
 
 
-
+// Reveal empty tiles when multiple are revealed
 void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
     if (x < 0 || x >= rows || y < 0 || y >= cols) return;
 
@@ -221,6 +244,7 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
 
     int bombCount = countBombs(x, y);
 
+    // If bombs are nearby stop current recursive loop and mark them
     if (bombCount > 0) {
         setNumberedTileAppearance(button, bombCount);
         return;
@@ -234,7 +258,7 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
     button->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     button->setFocusPolicy(Qt::NoFocus);
 
-    // **Recursive reveal**
+    // Recursive reveal while skipping current tile
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
             if (dx == 0 && dy == 0) continue;
@@ -242,15 +266,17 @@ void PiSweeper::revealAdjacentEmptyTiles(int x, int y) {
         }
     }
 
+    // Check whether the user has won or not
     if (checkVictory()) {
         VictoryHandler::revealAllTiles(buttons);
         VictoryHandler::showVictory(this);
+        updateWins();  // Track wins in JSON for skin unlocks
         gameOver = true;
     }
 }
 
 
-
+// Set tile number if theres a bomb nearby
 void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     // Set empty tile background
     QPixmap emptyPixmap(":/images/" + skin + "/empty.jpg");  // Load empty image from the correct skin
@@ -258,7 +284,7 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     button->setIcon(QIcon(emptyPixmap));
     button->setIconSize(emptyPixmap.size());
 
-    // Remove previous QLabel (if any) to prevent overlap
+    // Remove previous QLabel (if any) to prevent overlap, (shouldn't need to do this but just in case)
     QLabel *existingLabel = button->findChild<QLabel*>();
     if (existingLabel) {
         delete existingLabel;
@@ -270,7 +296,7 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     label->setFont(QFont("DejaVu Sans", 18, QFont::Bold));
     label->setAlignment(Qt::AlignCenter);
     
-    // Color code numbers (like real Minesweeper)
+    // Color code numbers based on amount of mines touching tile
     QString color;
     switch (bombCount) {
         case 1: color = "#52cbff"; break;  // Light Blue
@@ -293,14 +319,17 @@ void PiSweeper::setNumberedTileAppearance(QPushButton *button, int bombCount) {
     if (checkVictory()) {
         VictoryHandler::revealAllTiles(buttons);
         VictoryHandler::showVictory(this);
+        updateWins();  // Track wins in JSON for skins unlock
         gameOver = true;
     }
+
 }
 
-
+// Check if the user has won the game
 bool PiSweeper::checkVictory() {
     int unrevealedTiles = 0;
 
+    // Make sure all tiles without bombs are revealed
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
             if (!bombs[row][col] && !buttons[row][col]->property("revealed").toBool()) {
@@ -309,7 +338,43 @@ bool PiSweeper::checkVictory() {
         }
     }
 
-    return (unrevealedTiles == 0);  // Victory triggers when all non-bomb tiles are revealed
+    return (unrevealedTiles == 0);  // Victory triggers when all nonbomb tiles are revealed
 }
 
+// Update win count json data for skin unlocks
+void PiSweeper::updateWins() {
+    QFile file("skins.json");
+    if (!file.open(QIODevice::ReadWrite)) {
+        return;
+    }
 
+    QByteArray jsonData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    QJsonObject root = doc.object();
+
+    // Increment the win count
+    int wins = root["wins"].toInt();
+    wins++;
+    root["wins"] = wins;
+    qDebug() << "New win count:" << wins;
+
+    // Unlock skins based on wins
+    QJsonObject skins = root["skins"].toObject();
+    for (QString key : skins.keys()) {
+        QJsonObject skinData = skins[key].toObject();
+        if (skinData.contains("unlockRequirement")) {
+            int requiredWins = skinData["unlockRequirement"].toInt();
+            if (wins >= requiredWins && !skinData["unlocked"].toBool()) {
+                skinData["unlocked"] = true;
+                qDebug() << "Unlocked skin:" << key;
+            }
+        }
+        skins[key] = skinData;
+    }
+    root["skins"] = skins;
+
+    // Save the updated JSON
+    file.resize(0);
+    file.write(QJsonDocument(root).toJson());
+    file.close();
+}

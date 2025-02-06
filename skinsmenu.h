@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QPixmap>
 
+// Declarations 
 class SkinsMenu : public QWidget {
     Q_OBJECT
 public:

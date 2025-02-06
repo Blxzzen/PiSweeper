@@ -15,7 +15,7 @@ PiSweeperWindow::PiSweeperWindow(QWidget *parent) : QMainWindow(parent), game(nu
 
         QJsonDocument doc = QJsonDocument::fromJson(jsonData);
         QJsonObject root = doc.object();
-        currentSkin = root["currentSkin"].toString();  // Store it
+        currentSkin = root["currentSkin"].toString();  // Store skin
     } else {
         currentSkin = "default";  // Fallback
     }
@@ -37,7 +37,7 @@ PiSweeperWindow::PiSweeperWindow(QWidget *parent) : QMainWindow(parent), game(nu
     setCentralWidget(mainWidget);
 }
 
-
+// Starts minesweeper game passing applied skin
 void PiSweeperWindow::startGame() {
     delete menu;
     menu = nullptr;
@@ -46,9 +46,7 @@ void PiSweeperWindow::startGame() {
     mainLayout->addWidget(game);
 }
 
-
-
-
+// Creates the toolbar
 void PiSweeperWindow::setupToolBar() {
     toolBar = new QToolBar(this);
     addToolBar(Qt::TopToolBarArea, toolBar);
@@ -74,6 +72,7 @@ void PiSweeperWindow::setupToolBar() {
 
     toolBar->installEventFilter(this);
 
+    // General styling
     toolBar->setStyleSheet(R"(
         QToolBar {
             background-color: #1e1e1e;
@@ -94,6 +93,7 @@ void PiSweeperWindow::setupToolBar() {
     )");
 }
 
+// for making toolbar draggable
 bool PiSweeperWindow::eventFilter(QObject *obj, QEvent *event) {
     if (obj->inherits("QToolBar")) {
         if (event->type() == QEvent::MouseButtonPress) {
@@ -117,14 +117,15 @@ bool PiSweeperWindow::eventFilter(QObject *obj, QEvent *event) {
     return QMainWindow::eventFilter(obj, event);
 }
 
+// Returns to main menu
 void PiSweeperWindow::returnToMenu() {
-    // Remove the game if it's running
+    // Remove the game if its running
     if (game) {
         delete game;
         game = nullptr;
     }
 
-    // Remove skins menu if it's active
+    // Remove skins menu if its active
     if (skinsMenu) {
         delete skinsMenu;
         skinsMenu = nullptr;
@@ -173,14 +174,14 @@ void PiSweeperWindow::openSkinsMenu() {
     mainLayout->addWidget(skinsMenu);
 }
 
+// Applies a new skin, updates current skin in memory and JSON file, returns to menu after applying
 void PiSweeperWindow::applySkin(QString skinName) {
-    // Update `currentSkin` in memory
+    // Update currentSkin in memory
     currentSkin = skinName;
 
-    // Update `currentSkin` in `skins.json`
+    // Update currentSkin in skins.json
     QFile file("skins.json");
     if (!file.open(QIODevice::ReadWrite)) {
-        qDebug() << "Failed to open skins.json";
         return;
     }
 

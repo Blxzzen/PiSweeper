@@ -9,6 +9,7 @@
 #include "menu.h"
 #include "skinsmenu.h"
 
+// Declarations
 class PiSweeperWindow : public QMainWindow {
     Q_OBJECT
 public:
@@ -16,8 +17,8 @@ public:
 
 private slots:
     void startGame();  // Function to switch from Menu to Game
-    void openSkinsMenu();
-    void applySkin(QString skinName);
+    void openSkinsMenu(); // Function to switch from Menu to Skins Menu
+    void applySkin(QString skinName); // Function to apply skin
 
 private:
     QWidget *mainWidget;

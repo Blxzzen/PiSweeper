@@ -1,5 +1,4 @@
 #include "skinsmenu.h"
-#include <QDebug>
 #include <QJsonArray> 
 
 SkinsMenu::SkinsMenu(QWidget *parent) : QWidget(parent) {
@@ -21,7 +20,6 @@ SkinsMenu::SkinsMenu(QWidget *parent) : QWidget(parent) {
 void SkinsMenu::loadSkins() {
     QFile file("skins.json");
     if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << "Failed to open skins.json";
         return;
     }
 
@@ -32,7 +30,6 @@ void SkinsMenu::loadSkins() {
     QJsonObject root = doc.object();
 
     if (!root.contains("skins")) {
-        qDebug() << "ERROR: Skins JSON missing 'skins' key!";
         return;
     }
 
@@ -51,7 +48,6 @@ void SkinsMenu::loadSkins() {
     int row = 0, col = 0;
     for (const QString &key : orderedKeysList) {
         if (!skinsObject.contains(key)) {
-            qDebug() << "WARNING: Skin key" << key << "not found in JSON!";
             continue;
         }
 
@@ -61,7 +57,6 @@ void SkinsMenu::loadSkins() {
 
         // Check if folder path is valid
         if (folder.isEmpty()) {
-            qDebug() << "ERROR: Skin" << key << "is missing folder path!";
             continue;
         }
 
@@ -70,20 +65,19 @@ void SkinsMenu::loadSkins() {
         QPixmap previewPixmap(imagePath);
 
         if (previewPixmap.isNull()) {
-            qDebug() << "ERROR: Failed to load image for" << key << "from" << imagePath;
             continue;  // Skip this skin instead of crashing
         }
 
         previewPixmap = previewPixmap.scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-        // Determine border color
+        // Determine border color (red locked, blue unlocked, green equipped)
         QString borderColor;
         if (key == currentSkin) {
-            borderColor = "border: 3px solid #00ff00;";
+            borderColor = "border: 3px solid #6aff6a;"; // Green (Equipped)
         } else if (unlocked) {
-            borderColor = "border: 3px solid #007bff;";
+            borderColor = "border: 3px solid #4bd3ff;"; // Blue (Unlocked)
         } else {
-            borderColor = "border: 3px solid #ff0000;";
+            borderColor = "border: 3px solid #ff003c;"; // Red (Locked)
         }
 
         // Create skin widget
@@ -141,7 +135,6 @@ void SkinsMenu::loadSkins() {
 void SkinsMenu::selectSkin(QString skinName) {
     QFile file("skins.json");
     if (!file.open(QIODevice::ReadWrite)) {
-        qDebug() << "Failed to open skins.json";
         return;
     }
 

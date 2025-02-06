@@ -3,12 +3,13 @@
 
 #include "gameover.h"
 #include "victory.h"
-#include <QMainWindow>  // Change from QWidget to QMainWindow
+#include <QMainWindow> 
 #include <QVector>
 #include <QPushButton>
 #include <QGridLayout>
 
-class PiSweeper : public QWidget {  // Inherit from QMainWindow
+// Decalrations
+class PiSweeper : public QWidget { 
     Q_OBJECT
 public:
     explicit PiSweeper(QWidget *parent = nullptr, const QString &skinName = "default");
@@ -16,19 +17,21 @@ public:
     QSize sizeHint() const;
 
 private:
-    QWidget *centralWidget;  // Needed for QMainWindow
+    QWidget *centralWidget;
     QGridLayout *gridLayout;
     QVector<QVector<QPushButton*>> buttons;
     QVector<QVector<bool>> bombs;
     QVector<QVector<bool>> flags;
-    int rows = 16;
-    int cols = 30;
-    int totalBombs = 1;
-    bool gameOver = false; // Track if the game is over
-    QString skin;
+    int rows = 16; // Grid rows
+    int cols = 30; // Grid columns
+    int totalBombs = 99; // Amount of bombs in grid
+    bool gameOver = false; // Tracks game status
+    bool firstClick = true; // Track whether first click of the game or not
+    QString skin; // Passes skin through
 
+    // Declared functions + their parameters
     void setupBoard();
-    void placeBombs();
+    void placeBombs(int firstRow, int firstCol);
     void buttonClicked();
     int countBombs(int x, int y);
 
@@ -37,6 +40,7 @@ private:
     void revealAdjacentEmptyTiles(int x, int y); 
     void setNumberedTileAppearance(QPushButton *button, int bombCount);
     bool checkVictory();
+    void updateWins();
 };
 
 #endif // PISWEEPER_H

@@ -7,6 +7,7 @@
 #include <QPixmap>
 #include <QVector>
 
+// Declarations
 class VictoryHandler {
 public:
     static void revealAllTiles(QVector<QVector<QPushButton*>>& buttons);

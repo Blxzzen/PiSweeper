@@ -1,11 +1,6 @@
 {
-    "currentSkin": "valentines",
+    "currentSkin": "golden",
     "skins": {
-        "skull": {
-            "folder": "images/golden",
-            "unlockRequirement": 1,
-            "unlocked": false
-        },
         "default": {
             "folder": "images/default",
             "unlocked": true
@@ -13,11 +8,16 @@
         "golden": {
             "folder": "images/golden",
             "unlockRequirement": 1,
-            "unlocked": false
+            "unlocked": true
         },
         "light": {
             "folder": "images/light",
             "unlocked": true
+        },
+        "skull": {
+            "folder": "images/skull",
+            "unlockRequirement": 3,
+            "unlocked": false
         },
         "valentines": {
             "folder": "images/valentines",

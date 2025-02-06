@@ -7,6 +7,7 @@
 #include <QPixmap>
 #include <QVector>
 
+// Declarations
 class GameOverHandler {
 public:
     static void revealAllBombs(QVector<QVector<QPushButton*>>& buttons, QVector<QVector<bool>>& bombs, const QString &skin);

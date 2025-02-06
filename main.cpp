@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "pisweeperwindow.h"
 
+// Build main window and start application
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
